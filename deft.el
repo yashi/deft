@@ -1176,10 +1176,15 @@ non-nil and title is not from filename, use it as the title."
       (setq slug (deft-unused-slug)))
     (deft-new-file-named slug)))
 
+(defun deft-filename-at-point ()
+  "Return the file name represented by the widget at the point,
+or nil, If the point is not on a file widget."
+  (widget-get (widget-at) :tag))
+
 (defun deft-open-file-other-window (&optional arg)
   "When the point is at a widget, open the file in the other window."
   (interactive "P")
-  (let ((file (widget-get (widget-at) :tag)))
+  (let ((file (deft-filename-at-point)))
     (when file
       (deft-open-file file t arg))))
 
@@ -1188,7 +1193,7 @@ non-nil and title is not from filename, use it as the title."
 If the point is not on a file widget, do nothing.  Prompts before
 proceeding."
   (interactive)
-  (let ((filename (widget-get (widget-at) :tag)))
+  (let ((filename (deft-filename-at-point)))
     (when filename
       (when (y-or-n-p
              (concat "Delete file " (file-name-nondirectory filename) "? "))
@@ -1201,7 +1206,7 @@ proceeding."
   "Rename the file represented by the widget at the point.
 If the point is not on a file widget, do nothing."
   (interactive)
-  (let ((old-filename (widget-get (widget-at) :tag))
+  (let ((old-filename (deft-filename-at-point))
         (deft-dir (file-name-as-directory deft-directory))
         new-filename old-name new-name)
     (when old-filename
@@ -1220,7 +1225,7 @@ If the point is not on a file widget, do nothing."
 If the point is not on a file widget, do nothing."
   (interactive)
   (let (old new name-ext)
-    (setq old (widget-get (widget-at) :tag))
+    (setq old (deft-filename-at-point))
     (when old
       (setq name-ext (file-name-nondirectory old))
       (setq new (concat deft-archive-directory name-ext))
