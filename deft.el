@@ -1198,15 +1198,27 @@ If the file does not exist, do nothing.  Prompts before proceeding."
       (delq filename deft-current-files)
       (delq filename deft-all-files))))
 
+(defun deft-map-region-each-line (func start end)
+  (save-excursion
+    (goto-char start)
+    (let (list)
+     (while (< (point) end)
+       (add-to-list 'list (funcall func) list)
+       (forward-line 1))
+     list)))
+
 (defun deft-delete-file ()
   "Delete the file represented by the widget at the point.
+If there is an active region, remove all files under the region.
 If the point is not on a file widget, do nothing.  Prompts before
-proceeding."
+proceeding each file."
   (interactive)
-  (let ((filename (deft-filename-at-point)))
-    (when filename
-      (deft-delete-a-file filename)
-      (deft-refresh))))
+  (let ((files (if (region-active-p)
+                   (deft-map-region-each-line
+                     'deft-filename-at-point (region-beginning) (region-end))
+                 (list (deft-filename-at-point)))))
+    (mapcar 'deft-delete-a-file files)
+    (deft-refresh)))
 
 (defun deft-rename-file ()
   "Rename the file represented by the widget at the point.
