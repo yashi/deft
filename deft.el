@@ -1188,6 +1188,16 @@ or nil, If the point is not on a file widget."
     (when file
       (deft-open-file file t arg))))
 
+(defun deft-delete-a-file (filename)
+  "Delete the specified file.
+If the file does not exist, do nothing.  Prompts before proceeding."
+  (when (and filename (file-exists-p filename))
+    (when (y-or-n-p
+           (concat "Delete file " (file-name-nondirectory filename) "? "))
+      (delete-file filename)
+      (delq filename deft-current-files)
+      (delq filename deft-all-files))))
+
 (defun deft-delete-file ()
   "Delete the file represented by the widget at the point.
 If the point is not on a file widget, do nothing.  Prompts before
@@ -1195,12 +1205,8 @@ proceeding."
   (interactive)
   (let ((filename (deft-filename-at-point)))
     (when filename
-      (when (y-or-n-p
-             (concat "Delete file " (file-name-nondirectory filename) "? "))
-        (delete-file filename)
-        (delq filename deft-current-files)
-        (delq filename deft-all-files)
-        (deft-refresh)))))
+      (deft-delete-a-file filename)
+      (deft-refresh))))
 
 (defun deft-rename-file ()
   "Rename the file represented by the widget at the point.
